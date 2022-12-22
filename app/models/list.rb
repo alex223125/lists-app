@@ -3,5 +3,6 @@
 class List < ApplicationRecord
   acts_as_paranoid
 
-  has_many :items
+  belongs_to :user
+  has_many :items, dependent: :destroy
 end

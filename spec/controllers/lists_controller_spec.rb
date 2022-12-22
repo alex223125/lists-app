@@ -78,21 +78,20 @@ RSpec.describe ListsController, type: :controller do
 
   describe 'GET /show' do
     let(:user) { create(:user, :with_lists_and_items) }
+    let(:list) { user.lists.first }
 
     context 'when we have authorized user' do
       before do
         headers = { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
         auth_headers = Devise::JWT::TestHelpers.auth_headers(headers, user)
         request.headers.merge!(auth_headers)
-        @list = user.lists.first
-        list_id = @list.id
 
-        get :show, params: { id: list_id }
+        get :show, params: { id: list.id }
       end
 
       it 'returns correct list' do
         result = JSON.parse(response.body)
-        expected_result = @list.as_json
+        expected_result = list.as_json
 
         expect(result).to eq(expected_result)
       end
@@ -104,10 +103,7 @@ RSpec.describe ListsController, type: :controller do
 
     context 'when we dont have authorized user' do
       before do
-        @list = user.lists.first
-        list_id = @list.id
-
-        get :show, params: { id: list_id }
+        get :show, params: { id: list.id }
       end
 
       it 'returns status code 302' do
@@ -117,24 +113,26 @@ RSpec.describe ListsController, type: :controller do
   end
 
   describe 'POST /create' do
-    let(:user) { create(:user, :with_lists_and_items) }
+    let!(:user) { create(:user, :with_lists_and_items) }
 
     context 'when we have authorized user' do
       context 'when we have correct params' do
+        let!(:lists_before_create) { List.all.count }
+        let(:params) do
+          { list: { name: 'test_name',
+                    is_public: true } }
+        end
+
         before do
           headers = { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
           auth_headers = Devise::JWT::TestHelpers.auth_headers(headers, user)
           request.headers.merge!(auth_headers)
-          @lists_before_create = List.all.count
 
-          @params = { list: { name: 'test_name',
-                              is_public: true } }
-
-          post :create, params: @params
+          post :create, params: params
         end
 
         it 'adds one list' do
-          epxected_result = @lists_before_create + 1
+          epxected_result = lists_before_create + 1
           result = List.all.count
 
           expect(result).to eq(epxected_result)
@@ -142,14 +140,14 @@ RSpec.describe ListsController, type: :controller do
 
         it 'returns correct name' do
           result = JSON.parse(response.body)['name']
-          expected_result = @params[:list][:name]
+          expected_result = params[:list][:name]
 
           expect(result).to eq(expected_result)
         end
 
         it 'returns correct is_public flag' do
           result = JSON.parse(response.body)['is_public']
-          expected_result = @params[:list][:is_public]
+          expected_result = params[:list][:is_public]
 
           expect(result).to eq(expected_result)
         end
@@ -161,11 +159,13 @@ RSpec.describe ListsController, type: :controller do
     end
 
     context 'when we dont have authorized user' do
-      before do
-        @params = { list: { name: 'test_name',
-                            is_public: true } }
+      let(:params) do
+        { list: { name: 'test_name',
+                  is_public: true } }
+      end
 
-        get :create, params: @params
+      before do
+        get :create, params: params
       end
 
       it 'returns status code 302' do
@@ -179,28 +179,31 @@ RSpec.describe ListsController, type: :controller do
 
     context 'when we have authorized user' do
       context 'when we have correct params' do
+        let(:list_id) { user.lists.first.id }
+        let(:params) do
+          { id: list_id,
+            list: { name: 'test_name_test_name',
+                    is_public: true } }
+        end
+
         before do
           headers = { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
           auth_headers = Devise::JWT::TestHelpers.auth_headers(headers, user)
           request.headers.merge!(auth_headers)
-          list_id = user.lists.first.id
-          @params = { id: list_id,
-                      list: { name: 'test_name_test_name',
-                              is_public: true } }
 
-          put :update, params: @params
+          put :update, params: params
         end
 
         it 'returns new name' do
           result = JSON.parse(response.body)['name']
-          expected_result = @params[:list][:name]
+          expected_result = params[:list][:name]
 
           expect(result).to eq(expected_result)
         end
 
         it 'returns new value for is_public' do
           result = JSON.parse(response.body)['is_public']
-          expected_result = @params[:list][:is_public]
+          expected_result = params[:list][:is_public]
 
           expect(result).to eq(expected_result)
         end
@@ -212,14 +215,16 @@ RSpec.describe ListsController, type: :controller do
     end
 
     context 'when we dont have authorized user' do
-      before do
-        list_id = user.lists.first.id
-        @params = { id: list_id,
-                    item: { name: 'test_name',
-                            completion_status: 'test_completion_status',
-                            description: 'test description' } }
+      let(:list_id) { user.lists.first.id }
+      let(:params) do
+        { id: list_id,
+          item: { name: 'test_name',
+                  completion_status: 'test_completion_status',
+                  description: 'test description' } }
+      end
 
-        get :update, params: @params
+      before do
+        get :update, params: params
       end
 
       it 'returns status code 302' do
@@ -229,23 +234,23 @@ RSpec.describe ListsController, type: :controller do
   end
 
   describe 'DELETE /destroy' do
-    let(:user) { create(:user, :with_lists_and_items) }
+    let!(:user) { create(:user, :with_lists_and_items) }
 
     context 'when we have authorized user' do
+      let!(:lists_before_destroy) { List.all.count }
+      let(:list_id) { user.lists.first.id }
+      let(:params) { { id: list_id } }
+
       before do
         headers = { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
         auth_headers = Devise::JWT::TestHelpers.auth_headers(headers, user)
         request.headers.merge!(auth_headers)
 
-        @lists_before_destroy = List.all.count
-        list_id = user.lists.first.id
-        @params = { id: list_id }
-
-        delete :destroy, params: @params
+        delete :destroy, params: params
       end
 
       it 'removes one list item' do
-        epxected_result = @lists_before_destroy - 1
+        epxected_result = lists_before_destroy - 1
         result = List.all.count
 
         expect(result).to eq(epxected_result)
@@ -257,11 +262,11 @@ RSpec.describe ListsController, type: :controller do
     end
 
     context 'when we dont have authorized user' do
-      before do
-        list_id = user.lists.first.id
-        @params = { id: list_id }
+      let(:list_id) { user.lists.first.id }
+      let(:params) { { id: list_id } }
 
-        delete :destroy, params: @params
+      before do
+        delete :destroy, params: params
       end
 
       it 'returns status code 302' do

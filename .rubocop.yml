@@ -44,3 +44,9 @@ Naming/FileName:
 
 Rails:
   Enabled: true
+
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/LetSetup:
+  Enabled: false

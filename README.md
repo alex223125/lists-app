@@ -1,24 +1,20 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Preparations:
 
-Things you may want to cover:
+Navigate to rails app:
 
-* Ruby version
+```
+# remove all containers 
+docker-compose down -v
 
-* System dependencies
+# create build 
+docker-compose up -d --build
 
-* Configuration
+# prepare database 
+docker-compose run web rails db:create
+docker-compose run web rails db:migrate
+```
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+# Access app 
+```http://192.168.2.90:8080/```

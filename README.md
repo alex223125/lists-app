@@ -5,7 +5,8 @@ Preparations:
 Navigate to rails app:
 
 ```
-# remove all containers 
+# remove all previous containers 
+docker compose rm
 docker-compose down -v
 
 # create build 
@@ -18,3 +19,6 @@ docker-compose run web rails db:migrate
 
 # Access app 
 ```http://192.168.2.90:8080/```
+
+# Run tests
+```rspec```

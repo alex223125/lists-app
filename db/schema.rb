@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_22_020212) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_22_021445) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "items", force: :cascade do |t|
+    t.string "name"
+    t.string "completion_status"
+    t.text "description"
+    t.bigint "list_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_items_on_deleted_at"
+    t.index ["list_id"], name: "index_items_on_list_id"
+  end
 
   create_table "jwt_denylist", force: :cascade do |t|
     t.string "jti", null: false
@@ -27,6 +39,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_22_020212) do
     t.boolean "is_public"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_lists_on_deleted_at"
   end
 
   create_table "users", force: :cascade do |t|
@@ -41,4 +55,5 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_22_020212) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "items", "lists"
 end

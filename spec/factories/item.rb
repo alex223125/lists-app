@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :item do
-    name { "item test title" }
-    completion_status { "item completion status" }
-    description { "description description description" }
+    name { 'item test title' }
+    completion_status { 'item completion status' }
+    description { 'description description description' }
     # trait :with_unfinished_order_items do
     #   after(:create) do |order|
     #     menu_item = create(:menu_item)

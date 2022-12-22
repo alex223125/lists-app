@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :list do
-    name { "test_name" }
+    name { 'test_name' }
     is_public { true }
   end
 end

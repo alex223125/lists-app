@@ -1,11 +1,15 @@
+# frozen_string_literal: true
+
 class ListsController < ApplicationController
-  before_action :set_list, only: %i[ show update destroy ]
+  before_action :set_list, only: %i[show update destroy]
+  before_action :authenticate_user!, except: %i[index]
 
   # GET /lists
   def index
-    @lists = List.all
+    form = Forms::Lists::ListsSearchForm.new(current_user: current_user)
+    form.submit
 
-    render json: @lists
+    render json: form.results
   end
 
   # GET /lists/1
@@ -15,7 +19,7 @@ class ListsController < ApplicationController
 
   # POST /lists
   def create
-    @list = List.new(list_params)
+    @list = current_user.lists.new(list_params)
 
     if @list.save
       render json: @list, status: :created, location: @list
@@ -39,13 +43,14 @@ class ListsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_list
-      @list = List.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def list_params
-      params.require(:list).permit(:name, :is_public)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_list
+    @list = List.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def list_params
+    params.require(:list).permit(:name, :is_public)
+  end
 end

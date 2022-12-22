@@ -1,0 +1,30 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5491:5432" # use port that you want to in your local instead of 5491
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  web:
+    build: .
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+  front:
+    build: ./frontend
+    ports:
+      - "8091:8080" # use port that you want to in your local instead of 8091
+    volumes:
+      - ./frontend:/frontend
+      - front_node_modules:/frontend/node_modules
+
+volumes:
+  db:
+  rails_log:
+  front_node_modules:

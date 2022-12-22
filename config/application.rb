@@ -19,6 +19,7 @@ module ListsApp
 
     config.middleware.use config.session_store, config.session_options
 
+    Dir[Rails.root.join('app/forms/**/*.rb')].each{|rb| require rb}
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
